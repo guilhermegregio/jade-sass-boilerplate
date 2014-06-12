@@ -5,7 +5,7 @@ module.exports = function (grunt) {
 	require('time-grunt')(grunt);
 
 	var config = {
-		app: 'app',
+		app: 'src',
 		dist: 'dist'
 	};
 
@@ -15,7 +15,7 @@ module.exports = function (grunt) {
 		watch: {
 			compass: {
 				files: ['<%= config.app %>/sass/{,*/}*.{scss,sass}'],
-				tasks: ['compass']
+				tasks: ['sass']
 			},
 			jade: {
 				files: ['<%= config.app %>/jade/{,*/}*.jade'],
@@ -44,22 +44,30 @@ module.exports = function (grunt) {
 					middleware: function (connect) {
 						return [
 							connect.static(config.dist),
+							connect().use('/bower_components', connect.static('./bower_components')),
 							connect.static(config.app)
 						];
 					}
 				}
 			},
 		},
-		compass: {
+		sass: {
 			options: {
-				sassDir: '<%= config.app %>/sass',
-				cssDir: '<%= config.dist %>/stylesheets'
+				loadPath: [
+					'./bower_components'
+				],
+				debugInfo: false,
+				style: 'compressed' // nested, compact, compressed, expanded
 			},
-			server: {
-				options: {
-					debugInfo: false
-				}
-			}
+			dist: {
+				files: [{
+					expand: true,
+					cwd: '<%= config.app %>/sass',
+					src: ['*.scss'],
+					dest: '<%= config.dist %>/stylesheets',
+					ext: '.css'
+				}]
+			},
 		},
 		jade: {
 			compile: {
@@ -87,7 +95,7 @@ module.exports = function (grunt) {
 	});
 
 	grunt.registerTask('default', [
-		'compass',
+		'sass',
 		'jade'
 	]);
 
